@@ -36,12 +36,7 @@ class RedBlackTree {
 
     Node<T>* minValueNode(Node<T>* node);
 
-    void inorderHelper(Node<T>* node, std::vector<T>& vec) const {
-        if (!node) return;
-        inorderHelper(node->left, vec);     // 1. lewy poddrzewo
-        vec.push_back(node->value);        // 2. wizyta węzła
-        inorderHelper(node->right, vec);    // 3. prawy poddrzewo
-    }
+
 
 public:
     RedBlackTree() : root(nullptr) {}
