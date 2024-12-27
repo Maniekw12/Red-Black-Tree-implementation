@@ -13,10 +13,10 @@ struct Node {
 
     Node(const T& val)
             : value(val),
-            left(nullptr),
-            right(nullptr),
-            parent(nullptr),
-            color(RED)
+              left(nullptr),
+              right(nullptr),
+              parent(nullptr),
+              color(RED)
     {}
 };
 
@@ -31,6 +31,7 @@ class RedBlackTree {
     void transplant(Node<T> *root, Node<T>* u, Node<T>* v);
 
     void fixInsert(Node<T>* node);
+    void fixDelete(Node<T>* node);
 
     Node<T>* minValueNode(Node<T>* node);
 
@@ -197,7 +198,6 @@ void RedBlackTree<T>::insert(const T& key) {
     fixInsert(node);
 }
 
-
 template <typename T>
 void RedBlackTree<T>::fixInsert(Node<T>* node) {
     Node<T>* parent = nullptr;
@@ -280,10 +280,8 @@ void RedBlackTree<T>::transplant(Node<T> *root, Node<T> *u, Node<T> *v) {
     }
 }
 
-
 //przerobic na boolean
 // Usuwanie doprzeanalizować
-
 template <typename T>
 void RedBlackTree<T>::remove(T key) {
     Node<T>* node = root;
@@ -293,11 +291,11 @@ void RedBlackTree<T>::remove(T key) {
 
     // 1. Szukamy węzła o wartości key w drzewie
     while (node != nullptr) {
-        if (node->data == key) {
+        if (node->value == key) {
             z = node;   // Zapamiętujemy węzeł, który chcemy usunąć
         }
 
-        if (node->data <= key) {
+        if (node->value <= key) {
             node = node->right;
         }
         else {
@@ -320,12 +318,12 @@ void RedBlackTree<T>::remove(T key) {
         x = z->right;
         transplant(root, z, z->right);
     }
-    // b) Węzeł z ma pusty prawy podwęzeł
+        // b) Węzeł z ma pusty prawy podwęzeł
     else if (z->right == nullptr) {
         x = z->left;
         transplant(root, z, z->left);
     }
-    // c) Węzeł z ma *oba* podwęzły (lewą i prawą gałąź)
+        // c) Węzeł z ma *oba* podwęzły (lewą i prawą gałąź)
     else {
         y = minValueNode(z->right);
         yOriginalColor = y->color;
@@ -362,4 +360,90 @@ Node<T>* RedBlackTree<T>::minValueNode(Node<T>* node)
     return current;
 }
 
+template <typename T>
+void RedBlackTree<T>:: fixDelete(Node<T>* node)
+{
+    // Kontynuuj naprawianie dopóki nie dotrzemy do korzenia i węzeł jest czarny
+    while (node != root && node->color == BLACK) {
+        // Przypadek gdy bieżący węzeł jest lewym dzieckiem
+        if (node == node->parent->left) {
+            Node<T>* sibling = node->parent->right;
+
+            // Przypadek 1: Brat jest czerwony
+            if (sibling->color == RED) {
+                sibling->color = BLACK;
+                node->parent->color = RED;
+                rotateLeft(node->parent);
+                sibling = node->parent->right;
+            }
+
+            // Przypadek 2: Oboje dzieci brata są czarne lub nullptr bo zakladamy ze nullptr to czarne dziecko
+            if ((sibling->left == nullptr || sibling->left->color == BLACK) &&
+                (sibling->right == nullptr || sibling->right->color == BLACK)) {
+
+                sibling->color = RED;
+                node = node->parent;
+            }
+            else {
+                // Przypadek 3: Prawe dziecko brata jest czarne
+                if (sibling->right == nullptr || sibling->right->color == BLACK) {
+                    if (sibling->left != nullptr)
+                        sibling->left->color = BLACK;
+
+                    sibling->color = RED;              // Brat staje się czerwony
+                    rotateRight(sibling);
+                    sibling = node->parent->right;
+                }
+
+                // Przypadek 4: Prawe dziecko brata jest czerwone
+                sibling->color = node->parent->color;
+                node->parent->color = BLACK;
+                if (sibling->right != nullptr)
+                    sibling->right->color = BLACK;
+                rotateLeft(node->parent);
+                node = root;
+            }
+        }
+            // Analogiczny przypadek gdy bieżący węzeł jest prawym dzieckiem
+        else {
+            Node<T>* sibling = node->parent->left;
+
+            // Przypadek 1: Brat jest czerwony
+            if (sibling->color == RED) {
+                sibling->color = BLACK;
+                node->parent->color = RED;
+                rotateRight(node->parent);
+                sibling = node->parent->left;
+            }
+
+            // Przypadek 2: Oboje dzieci brata są czarne
+            if ((sibling->left == nullptr || sibling->left->color == BLACK) &&
+                (sibling->right == nullptr || sibling->right->color == BLACK)) {
+                sibling->color = RED;
+                node = node->parent;
+            }
+            else {
+                // Przypadek 3: Lewe dziecko brata jest czarne
+                if (sibling->left == nullptr || sibling->left->color == BLACK) {
+                    if (sibling->right != nullptr)
+                        sibling->right->color = BLACK;
+                    sibling->color = RED;
+                    rotateLeft(sibling);
+                    sibling = node->parent->left;
+                }
+
+                // Przypadek 4: Lewe dziecko brata jest czerwone
+                sibling->color = node->parent->color;
+                node->parent->color = BLACK;
+
+                if (sibling->left != nullptr)
+                    sibling->left->color = BLACK;
+
+                rotateRight(node->parent);
+                node = root;
+            }
+        }
+    }
+    node->color = BLACK;
+}
 

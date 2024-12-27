@@ -2,6 +2,7 @@
 #include "RedBlackTree.h"
 #include <cassert>
 int main() {
+    // Tutaj beda testy //
 
     RedBlackTree<int> tree;
     assert(tree.empty());
@@ -19,9 +20,8 @@ int main() {
 
 
     tree.printTree();
-
-
-
-
+    tree.remove(8);
+    std::cout<<"------------------"<<std::endl;
+    tree.printTree();
     return 0;
 }
