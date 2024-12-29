@@ -1,7 +1,6 @@
 #include <iostream>
 #include <utility> // dla std::swap
 #include <string>
-#include <vector>
 enum Color { RED, BLACK };
 
 template <typename T>
@@ -24,6 +23,7 @@ struct Node {
 template <typename T>
 class RedBlackTree {
     Node<T>* root;
+    Node<T>* NIL;
 
     void destroySubtree(Node<T>* node);
     void rotateLeft(Node<T>* node);
@@ -36,41 +36,43 @@ class RedBlackTree {
 
     Node<T>* minValueNode(Node<T>* node);
 
-
-
 public:
-    RedBlackTree() : root(nullptr) {}
+    RedBlackTree() {
+        NIL = new Node<T>(T());
+        NIL->color = BLACK;
+        NIL->left = nullptr;
+        NIL->right = nullptr;
+        NIL->parent = nullptr;
+        root = NIL;
+    }
+
+    ~RedBlackTree() {
+        destroySubtree(root);
+        delete NIL;
+    }
 
     Color get_root_color() const {
-        if (root== nullptr){
+        if (root == NIL) {
             return BLACK;
         }
         return root->color;
     }
 
-    Node<T> * getRoot() const {
+    Node<T>* getRoot() const {
         return root;
     }
 
-    // Rekurencyjne usuwanie całego drzewa w destruktorze
-    ~RedBlackTree() {
-        destroySubtree(root);
-        root = nullptr;
-    }
-
-    // Metoda do wyczyszczenia drzewa
     void clear() {
         destroySubtree(root);
-        root = nullptr;
+        root = NIL;
     }
 
     bool empty() const {
-        return (root == nullptr);
+        return (root == NIL);
     }
 
-    // Szukanie węzła z określoną wartością
     Node<T>* search(Node<T>* node, const T& item) const {
-        if (node == nullptr || node->value == item) {
+        if (node == NIL || node->value == item) {
             return node;
         }
         else if (item < node->value) {
@@ -81,51 +83,42 @@ public:
         }
     }
 
-    // Wstawianie nowej wartości do drzewa
     void insert(const T& key);
-
     bool remove(T key);
 
-    void printTree()
-    {
-        if (root == nullptr)
+    void printTree() {
+        if (root == NIL)
             std::cout << "Tree is empty." << std::endl;
         else {
             std::cout << "Red-Black Tree:" << std::endl;
             printHelper(root, "", true);
         }
     }
-    void printHelper(Node<T>* node, const std::string& prefix = "", bool isLast = true)
-    {
-        if(node == nullptr){
+
+    void printHelper(Node<T>* node, const std::string& prefix = "", bool isLast = true) {
+        if (node == NIL) {
             return;
         }
 
-        std::cout <<prefix;
+        std::cout << prefix;
 
-        std::cout<<"-----";
+        std::cout << "-----";
 
-        std::string color;
-        if(node->color == RED){
-            color = "RED";
-        } else{
-            color = "BLACK";
-        }
-        std::cout <<node->value <<" (" + color + ") "<<std::endl;
+        std::string color = (node->color == RED) ? "RED" : "BLACK";
+        std::cout << node->value << " (" + color + ") " << std::endl;
 
         std::string newPrefix = prefix + (isLast ? "    " : "|   ");
 
-        if (node->left || node->right) {
-            printHelper(node->left,  newPrefix, node->right == nullptr);
+        if (node->left != NIL || node->right != NIL) {
+            printHelper(node->left, newPrefix, node->right == NIL);
             printHelper(node->right, newPrefix, true);
         }
     }
-
 };
 
 template <typename T>
 void RedBlackTree<T>::destroySubtree(Node<T>* node) {
-    if (!node) return;
+    if (node == NIL) return;
     destroySubtree(node->left);
     destroySubtree(node->right);
     delete node;
@@ -135,18 +128,16 @@ template <typename T>
 void RedBlackTree<T>::rotateLeft(Node<T>* node) {
     Node<T>* child = node->right;
     node->right = child->left;
-    if (child->left != nullptr) {
+    if (child->left != NIL) {
         child->left->parent = node;
     }
     child->parent = node->parent;
 
     if (node->parent == nullptr) {
         root = child;
-    }
-    else if (node == node->parent->left) {
+    } else if (node == node->parent->left) {
         node->parent->left = child;
-    }
-    else {
+    } else {
         node->parent->right = child;
     }
     child->left = node;
@@ -157,18 +148,16 @@ template <typename T>
 void RedBlackTree<T>::rotateRight(Node<T>* node) {
     Node<T>* child = node->left;
     node->left = child->right;
-    if (child->right != nullptr) {
+    if (child->right != NIL) {
         child->right->parent = node;
     }
     child->parent = node->parent;
 
     if (node->parent == nullptr) {
         root = child;
-    }
-    else if (node == node->parent->right) {
+    } else if (node == node->parent->right) {
         node->parent->right = child;
-    }
-    else {
+    } else {
         node->parent->left = child;
     }
     child->right = node;
@@ -178,11 +167,13 @@ void RedBlackTree<T>::rotateRight(Node<T>* node) {
 template <typename T>
 void RedBlackTree<T>::insert(const T& key) {
     Node<T>* node = new Node<T>(key);
+    node->left = NIL;
+    node->right = NIL;
 
     Node<T>* parent = nullptr;
     Node<T>* current = root;
 
-    while (current != nullptr) {
+    while (current != NIL) {
         parent = current;
         if (node->value < current->value) {
             current = current->left;
@@ -194,11 +185,9 @@ void RedBlackTree<T>::insert(const T& key) {
 
     if (parent == nullptr) {
         root = node;
-    }
-    else if (node->value < parent->value) {
+    } else if (node->value < parent->value) {
         parent->left = node;
-    }
-    else {
+    } else {
         parent->right = node;
     }
 
@@ -210,9 +199,7 @@ void RedBlackTree<T>::fixInsert(Node<T>* node) {
     Node<T>* parent = nullptr;
     Node<T>* grandparent = nullptr;
 
-    // Dopóki node nie jest korzeniem i ojciec węzła jest czerwony
-    while ((node != root) && (node->color == RED) &&
-           (node->parent->color == RED)) {
+    while ((node != root) && (node->color == RED) && (node->parent->color == RED)) {
 
         parent = node->parent;
         grandparent = parent->parent;
@@ -221,46 +208,39 @@ void RedBlackTree<T>::fixInsert(Node<T>* node) {
         if (parent == grandparent->left) {
             Node<T>* uncle = grandparent->right;
             // 1. Wujek jest czerwony
-            if (uncle != nullptr && uncle->color == RED) {
+            if (uncle->color == RED) {
                 grandparent->color = RED;
                 parent->color = BLACK;
                 uncle->color = BLACK;
                 node = grandparent;
-            }
-                // 2. Wujek jest czarny lub nie istnieje
-            else {
-                // a) node jest prawym dzieckiem -> rotacja w lewo na rodzicu
+            } else {
+                // 2. node jest prawym dzieckiem -
                 if (node == parent->right) {
                     rotateLeft(parent);
                     node = parent;
                     parent = node->parent;
                 }
-                // b) rotacja w prawo na dziadku
+                // 3. Wujek jest czarny, a wstawiany węzeł jest lewym dzieckiem ojca
                 rotateRight(grandparent);
                 std::swap(parent->color, grandparent->color);
                 node = parent;
             }
         }
             // Przypadek B: Ojciec jest prawym dzieckiem dziadka
+            // to samo co wyzej ale podmienione left z right
         else {
             Node<T>* uncle = grandparent->left;
-
-            // 1. Wujek jest czerwony
-            if (uncle != nullptr && uncle->color == RED) {
+            if (uncle->color == RED) {
                 grandparent->color = RED;
                 parent->color = BLACK;
                 uncle->color = BLACK;
                 node = grandparent;
-            }
-                // 2. Wujek jest czarny lub nie istnieje
-            else {
-                // a) node jest lewym dzieckiem -> rotacja w prawo na rodzicu
+            } else {
                 if (node == parent->left) {
                     rotateRight(parent);
                     node = parent;
                     parent = node->parent;
                 }
-                // b) rotacja w lewo na dziadku
                 rotateLeft(grandparent);
                 std::swap(parent->color, grandparent->color);
                 node = parent;
@@ -271,21 +251,9 @@ void RedBlackTree<T>::fixInsert(Node<T>* node) {
 }
 
 template <typename T>
-Node<T>* RedBlackTree<T>::minValueNode(Node<T>* node)
-{
-    Node<T>* current = node;
-    while (current->left != nullptr)
-        current = current->left;
-    return current;
-}
-
-
-
-template <typename T>
-void RedBlackTree<T>::transplant(Node<T>* u, Node<T>* v)
-{
+void RedBlackTree<T>::transplant(Node<T>* u, Node<T>* v) {
     if (u->parent == nullptr) {
-        this->root = v;
+        root = v;
     }
     else if (u == u->parent->left) {
         u->parent->left = v;
@@ -293,64 +261,43 @@ void RedBlackTree<T>::transplant(Node<T>* u, Node<T>* v)
     else {
         u->parent->right = v;
     }
-
-    if (v != nullptr) {
-        v->parent = u->parent;
-    }
+    v->parent = u->parent;
 }
 
+template <typename T>
+Node<T>* RedBlackTree<T>::minValueNode(Node<T>* node) {
+    while (node->left != NIL) {
+        node = node->left;
+    }
+    return node;
+}
 
 template <typename T>
-bool RedBlackTree<T>::remove(T key)
-{
-    Node<T>* node = this->root;
-    Node<T>* z = nullptr;
-    Node<T>* x = nullptr;
-    Node<T>* y = nullptr;
-
-    // 1. Szukamy węzła z wartością key
-    while (node != nullptr) {
-        if (node->value == key) {
-            z = node;
-        }
-        // Idziemy w prawo, jeśli node->value <= key,
-        // bo może jeszcze gdzieś w prawo być identyczny klucz.
-        if (node->value <= key) {
-            node = node->right;
-        } else {
-            node = node->left;
-        }
-    }
-
-    // 2. Jeśli nie znaleziono węzła, zwróć false (lub wyświetl komunikat)
-    if (z == nullptr) {
-        std::cout << "Key not found in the tree\n";
+bool RedBlackTree<T>::remove(T key) {
+    Node<T>* z = search(root, key);
+    if (z == NIL) {
         return false;
     }
 
-    y = z;
-    Color yOriginalColor = y->color;
+    Node<T>* y = z;
+    Color y_original_color = y->color;
+    Node<T>* x;
 
-    // 3a. Gdy z->left == nullptr
-    if (z->left == nullptr) {
+    if (z->left == NIL) {
         x = z->right;
         transplant(z, z->right);
     }
-        // 3b. Gdy z->right == nullptr
-    else if (z->right == nullptr) {
+    else if (z->right == NIL) {
         x = z->left;
         transplant(z, z->left);
     }
-        // 3c. Gdy z ma oboje dzieci
     else {
         y = minValueNode(z->right);
-        yOriginalColor = y->color;
+        y_original_color = y->color;
         x = y->right;
 
         if (y->parent == z) {
-            if (x != nullptr) {
-                x->parent = y;
-            }
+            x->parent = y;
         }
         else {
             transplant(y, y->right);
@@ -366,117 +313,82 @@ bool RedBlackTree<T>::remove(T key)
 
     delete z;
 
-    if (yOriginalColor == BLACK) {
+    if (y_original_color == BLACK) {
         fixDelete(x);
     }
 
     return true;
 }
 
-
 template <typename T>
-void RedBlackTree<T>::fixDelete(Node<T>* node)
-{
-    if (node == nullptr) {
-        return;
-    }
+void RedBlackTree<T>::fixDelete(Node<T>* node) {
+    Node<T>* sibling;
 
-    // Dopóki nie jesteśmy w korzeniu i węzeł jest czarny,
-    // staramy się przywrócić własności drzewa czerwono-czarnego.
-    while (node != this->root && node->color == BLACK) {
-
-        // PRZYPADEK A: node jest lewym dzieckiem
+    while (node != root && node->color == BLACK) {
+        //1) Node to lewe dziecko rodzica
         if (node == node->parent->left) {
-            Node<T>* sibling = node->parent->right;
+            sibling = node->parent->right;
 
-            // 1. Brat jest czerwony
-            if (sibling != nullptr && sibling->color == RED) {
+            // Przypadek 1: brat czerwony
+            if (sibling->color == RED) {
                 sibling->color = BLACK;
                 node->parent->color = RED;
                 rotateLeft(node->parent);
                 sibling = node->parent->right;
             }
-
-            // 2. Oba dzieci brata są czarne (lub nullptr)
-            if ((sibling == nullptr || sibling->left == nullptr  || sibling->left->color == BLACK) &&
-                (sibling == nullptr || sibling->right == nullptr || sibling->right->color == BLACK))
-            {
-                if (sibling != nullptr) {
-                    sibling->color = RED;
-                }
+            // Przypadek 2: brat ma 2 czarnych dzieci
+            if (sibling->left->color == BLACK && sibling->right->color == BLACK) {
+                // Przypadek 2: brat ma 2 czarnych dzieci
+                sibling->color = RED;
                 node = node->parent;
             }
+                // Przypadek 3: Prawy syn brata jest czarny
             else {
-                // 3. Prawe dziecko brata jest czarne, a lewe czerwone
-                if (sibling != nullptr &&
-                    (sibling->right == nullptr || sibling->right->color == BLACK))
-                {
-                    if (sibling->left != nullptr) {
-                        sibling->left->color = BLACK;
-                    }
+                if (sibling->right->color == BLACK) {
+                    sibling->left->color = BLACK;
                     sibling->color = RED;
                     rotateRight(sibling);
                     sibling = node->parent->right;
                 }
-                // 4. Prawe dziecko brata jest czerwone
-                if (sibling != nullptr) {
-                    sibling->color = node->parent->color;
-                }
+
+                // Przypadek 4: Prawy syn brata jest czerwony
+                sibling->color = node->parent->color;
                 node->parent->color = BLACK;
-                if (sibling != nullptr && sibling->right != nullptr) {
-                    sibling->right->color = BLACK;
-                }
+                sibling->right->color = BLACK;
                 rotateLeft(node->parent);
-                node = this->root;
+                node = root;
             }
         }
-            // PRZYPADEK B: node jest prawym dzieckiem (symetrycznie)
+            //1) Node to prawe dziecko rodzica
+            // wszyztkie przypadki tak samo z zamienionym lewym i prawym
         else {
-            Node<T>* sibling = node->parent->left;
-
-            // 1. Brat jest czerwony
-            if (sibling != nullptr && sibling->color == RED) {
+            sibling = node->parent->left;
+            if (sibling->color == RED) {
                 sibling->color = BLACK;
                 node->parent->color = RED;
                 rotateRight(node->parent);
                 sibling = node->parent->left;
             }
 
-            // 2. Oboje dzieci brata są czarne
-            if ((sibling == nullptr || sibling->left == nullptr  || sibling->left->color == BLACK) &&
-                (sibling == nullptr || sibling->right == nullptr || sibling->right->color == BLACK))
-            {
-                if (sibling != nullptr) {
-                    sibling->color = RED;
-                }
+            if (sibling->right->color == BLACK && sibling->left->color == BLACK) {
+                sibling->color = RED;
                 node = node->parent;
             }
             else {
-                // 3. Lewe dziecko brata jest czarne, a prawe czerwone
-                if (sibling != nullptr &&
-                    (sibling->left == nullptr || sibling->left->color == BLACK))
-                {
-                    if (sibling->right != nullptr) {
-                        sibling->right->color = BLACK;
-                    }
+                if (sibling->left->color == BLACK) {
+                    sibling->right->color = BLACK;
                     sibling->color = RED;
                     rotateLeft(sibling);
                     sibling = node->parent->left;
                 }
-                // 4. Lewe dziecko brata jest czerwone
-                if (sibling != nullptr) {
-                    sibling->color = node->parent->color;
-                }
+
+                sibling->color = node->parent->color;
                 node->parent->color = BLACK;
-                if (sibling != nullptr && sibling->left != nullptr) {
-                    sibling->left->color = BLACK;
-                }
+                sibling->left->color = BLACK;
                 rotateRight(node->parent);
-                node = this->root;
+                node = root;
             }
         }
     }
-
     node->color = BLACK;
 }
-
