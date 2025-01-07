@@ -3,8 +3,11 @@
 #include <string>
 enum Color { RED, BLACK };
 
+
+
 template <typename T>
-struct Node {
+class Node{
+public:
     T value;
     Node *left;
     Node *right;
