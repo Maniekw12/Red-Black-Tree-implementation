@@ -125,16 +125,9 @@ void test_remove_scenarios() {
         RedBlackTree<int> singleNodeTree;
         singleNodeTree.insert(42);
 
-        // [Scenariusz 1] PRZED USUNIĘCIEM 42:
-        //    42 (BLACK)
-
         assert(!singleNodeTree.empty());
         assertRedBlackTreeProperties(singleNodeTree);
         bool removed = singleNodeTree.remove(42);
-
-        // [Scenariusz 1] PO USUNIĘCIU 42:
-        // Drzewo jest puste.
-
 
 
         assert(removed);
@@ -149,20 +142,14 @@ void test_remove_scenarios() {
         tree.insert(20);
         tree.insert(15);
 
-        // [Scenariusz 2] PRZED USUNIĘCIEM 15:
-        //     15 (BLACK)
-        //    /     \
-        //  10 (RED) 20 (RED)
+
 
 
         assertRedBlackTreeProperties(tree);
 
         bool removed = tree.remove(15);
 
-        // [Scenariusz 2] PO USUNIĘCIEM 15:
-        //     20 (BLACK)
-        //    /
-        //  10 (RED)
+
 
 
         assert(removed);
@@ -176,14 +163,9 @@ void test_remove_scenarios() {
         tree.insert(10);
         tree.insert(20);
 
-        // [Scenariusz 3] PRZED USUNIĘCIEM 20:
-        //   10 (BLACK)
-        //      \
-        //     20 (RED)
+
         bool removed = tree.remove(20);
 
-        // [Scenariusz 3] PO USUNIĘCIU 20:
-        //   10 (BLACK)
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
@@ -202,22 +184,7 @@ void test_remove_scenarios() {
         tree.insert(25);
 
 
-        // [Scenariusz 4] PRZED USUNIĘCIEM 15:
-        //       15 (BLACK)
-        //      /       \
-        //  10 (BLACK)  20 (BLACK)
-        //  /   \        /     \
-        // 8 (RED) 12(RED) 17 (RED) 25 (RED)
-
         bool removed = tree.remove(15);
-
-        // [Scenariusz 4] PO USUNIĘCIEM 15:
-        //       17 (BLACK)
-        //      /       \
-        //  10 (BLACK)  20 (BLACK)
-        //  /   \            \
-        // 8 (RED) 12 (RED)  25 (RED)
-
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
@@ -232,20 +199,7 @@ void test_remove_scenarios() {
         tree.insert(15);
         tree.insert(7);
 
-        // [Scenariusz 5] PRZED USUNIĘCIEM 5 :
-        //       10 (BLACK)
-        //      /       \
-        //  5 (BLACK)  15 (BLACK)
-        //      \
-        //     7 (RED)
-
-
         bool removed = tree.remove(5);
-
-        // [Scenariusz 5] PO USUNIĘCIEM 5:
-        //       10 (BLACK)
-        //      /       \
-        //  7 (BLACK)  15 (BLACK)
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
@@ -263,21 +217,7 @@ void test_remove_scenarios() {
         tree.insert(25);
         tree.insert(35);
 
-        // [Scenariusz 6] PRZED USUNIĘCIEM 20:
-        //       20 (BLACK)
-        //      /       \
-        //  10 (BLACK)  30 (BLACK)
-        //  /   \        /     \
-        // 5 (RED) 15 (RED) 25 (RED) 35 (RED)
-
         bool removed = tree.remove(20);
-
-        // [Scenariusz 6] PO USUNIĘCIEM 20:
-        //       25 (BLACK)
-        //      /       \
-        //  10 (BLACK)  30 (BLACK)
-        //  /   \            \
-        // 5 (RED) 15 (RED)  35 (RED)
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
@@ -295,21 +235,7 @@ void test_remove_scenarios() {
         tree.insert(25);
 
 
-        // [Scenariusz 7] PRZED USUNIĘCIEM 20:
-        //       10 (BLACK)
-        //      /    \
-        //   5 (BLACK) 20 (BLACK)
-        //             /   \
-        //        15 (RED) 25 (RED)
-
         bool removed = tree.remove(20);
-
-        // [Scenariusz 7] PO USUNIĘCIU 20:
-        //       10 (BLACK)
-        //      /    \
-        //   5 (BLACK) 25 (BLACK)
-        //             /
-        //        15 (RED)
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
