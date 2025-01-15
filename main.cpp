@@ -180,7 +180,6 @@ void test_remove_scenarios() {
         //   10 (BLACK)
         //      \
         //     20 (RED)
-
         bool removed = tree.remove(20);
 
         // [Scenariusz 3] PO USUNIĘCIU 20:
@@ -201,6 +200,7 @@ void test_remove_scenarios() {
         tree.insert(12);
         tree.insert(17);
         tree.insert(25);
+
 
         // [Scenariusz 4] PRZED USUNIĘCIEM 15:
         //       15 (BLACK)
@@ -285,7 +285,7 @@ void test_remove_scenarios() {
     }
 
 
-    // 7) Usunięcie czerwonego węzła wewnętrznego z dwoma czarnymi dziećmi
+    // 7) Usunięcie czarnego węzła z dwoma czerwonymi dziećmi
     {
         RedBlackTree<int> tree;
         tree.insert(10);
@@ -294,28 +294,28 @@ void test_remove_scenarios() {
         tree.insert(15);
         tree.insert(25);
 
-        tree.printTree();
+
         // [Scenariusz 7] PRZED USUNIĘCIEM 20:
         //       10 (BLACK)
         //      /    \
-        //   5 (BLACK) 20 (RED)
+        //   5 (BLACK) 20 (BLACK)
         //             /   \
-        //        15 (BLACK) 25 (BLACK)
+        //        15 (RED) 25 (RED)
 
         bool removed = tree.remove(20);
-        tree.printTree();
 
         // [Scenariusz 7] PO USUNIĘCIU 20:
         //       10 (BLACK)
         //      /    \
         //   5 (BLACK) 25 (BLACK)
         //             /
-        //        15 (BLACK)
+        //        15 (RED)
 
         assert(removed);
         assertRedBlackTreeProperties(tree);
         std::cout << "Removal of red node with two black children passed!\n";
     }
+
 
 
 }
